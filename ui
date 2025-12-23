@@ -1,0 +1,166 @@
+--// Draggable + Resizable UI with Top-Center Toggle Button
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local pg = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Clear old
+if pg:FindFirstChild("MainUI") then pg.MainUI:Destroy() end
+if pg:FindFirstChild("ToggleUI") then pg.ToggleUI:Destroy() end
+
+--------------------------------------------------
+-- MAIN UI
+--------------------------------------------------
+local mainGui = Instance.new("ScreenGui")
+mainGui.Name = "MainUI"
+mainGui.ResetOnSpawn = false
+mainGui.Parent = pg
+
+local main = Instance.new("Frame")
+main.Size = UDim2.fromOffset(460, 280)
+main.Position = UDim2.fromScale(0.3, 0.3)
+main.BackgroundColor3 = Color3.fromRGB(18,18,24)
+main.BorderSizePixel = 0
+main.Parent = mainGui
+Instance.new("UICorner", main).CornerRadius = UDim.new(0,16)
+
+-- Top bar
+local top = Instance.new("Frame")
+top.Size = UDim2.new(1,0,0,42)
+top.BackgroundColor3 = Color3.fromRGB(28,28,38)
+top.BorderSizePixel = 0
+top.Parent = main
+Instance.new("UICorner", top).CornerRadius = UDim.new(0,16)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.fromScale(1,1)
+title.BackgroundTransparency = 1
+title.Text = "CONTROL PANEL"
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+title.TextColor3 = Color3.fromRGB(220,220,255)
+title.Parent = top
+
+-- Content
+local content = Instance.new("Frame")
+content.Position = UDim2.fromOffset(20,60)
+content.Size = UDim2.new(1,-40,1,-90)
+content.BackgroundTransparency = 1
+content.Parent = main
+
+--------------------------------------------------
+-- Drag main window
+--------------------------------------------------
+do
+	local dragging, startPos, dragStart
+	top.InputBegan:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			dragStart = i.Position
+			startPos = main.Position
+		end
+	end)
+	UIS.InputChanged:Connect(function(i)
+		if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+			local d = i.Position - dragStart
+			main.Position = UDim2.new(
+				startPos.X.Scale, startPos.X.Offset + d.X,
+				startPos.Y.Scale, startPos.Y.Offset + d.Y
+			)
+		end
+	end)
+	UIS.InputEnded:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end)
+end
+
+--------------------------------------------------
+-- Resize
+--------------------------------------------------
+local resize = Instance.new("Frame")
+resize.Size = UDim2.fromOffset(20,20)
+resize.Position = UDim2.new(1,-20,1,-20)
+resize.BackgroundColor3 = Color3.fromRGB(100,100,130)
+resize.Parent = main
+Instance.new("UICorner", resize).CornerRadius = UDim.new(1,0)
+
+do
+	local resizing, startSize, startPos
+	resize.InputBegan:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			resizing = true
+			startSize = main.Size
+			startPos = i.Position
+		end
+	end)
+	UIS.InputChanged:Connect(function(i)
+		if resizing and i.UserInputType == Enum.UserInputType.MouseMovement then
+			local d = i.Position - startPos
+			main.Size = UDim2.fromOffset(
+				math.max(320, startSize.X.Offset + d.X),
+				math.max(220, startSize.Y.Offset + d.Y)
+			)
+		end
+	end)
+	UIS.InputEnded:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			resizing = false
+		end
+	end)
+end
+
+--------------------------------------------------
+-- TOGGLE BUTTON (Top Center, Draggable)
+--------------------------------------------------
+local toggleGui = Instance.new("ScreenGui")
+toggleGui.Name = "ToggleUI"
+toggleGui.ResetOnSpawn = false
+toggleGui.Parent = pg
+
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.fromOffset(52,52)
+toggleBtn.AnchorPoint = Vector2.new(0.5, 0)
+toggleBtn.Position = UDim2.new(0.5, 0, 0.02, 0) -- กลางบน
+toggleBtn.BackgroundColor3 = Color3.fromRGB(0,120,255)
+toggleBtn.Text = "UI"
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextScaled = true
+toggleBtn.TextColor3 = Color3.new(1,1,1)
+toggleBtn.Parent = toggleGui
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(1,0)
+
+-- Toggle UI
+toggleBtn.MouseButton1Click:Connect(function()
+	main.Visible = not main.Visible
+end)
+
+-- Drag toggle button
+do
+	local dragging, startPos, dragStart
+	toggleBtn.InputBegan:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			dragStart = i.Position
+			startPos = toggleBtn.Position
+		end
+	end)
+	UIS.InputChanged:Connect(function(i)
+		if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+			local d = i.Position - dragStart
+			toggleBtn.Position = UDim2.new(
+				startPos.X.Scale, startPos.X.Offset + d.X,
+				startPos.Y.Scale, startPos.Y.Offset + d.Y
+			)
+		end
+	end)
+	UIS.InputEnded:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end)
+end
+
+print("UI Loaded (Top Center Toggle)")
